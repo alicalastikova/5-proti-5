@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>5 PROTI 5 — Tímová súťaž</title>
+<style>
+    * {
+        box-sizing: border-box;
+        user-select: none;
+    }
+    body {
+        font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: radial-gradient(circle at 10% 20%, #0B132B, #0A0F1F);
+        color: #F0F3FA;
+        margin: 0;
+        padding: 24px 16px;
+        min-height: 100vh;
+    }
+    .container {
+        max-width: 1300px;
+        margin: 0 auto;
+        background: rgba(12, 20, 35, 0.65);
+        backdrop-filter: blur(8px);
+        border-radius: 3rem;
+        padding: 1.5rem 2rem 2rem;
+        box-shadow: 0 25px 45px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.08);
+        border: 1px solid rgba(255, 160, 122, 0.25);
+    }
+    h1 {
+        background: linear-gradient(135deg, #FFB347, #FF6B6B);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        font-size: 3rem;
+        margin: 0 0 5px 0;
+        letter-spacing: -0.5px;
+        font-weight: 800;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .question {
+        font-size: 1.75rem;
+        background: linear-gradient(115deg, #1E2A47, #111B2E);
+        padding: 1.2rem;
+        border-radius: 2.5rem;
+        margin: 25px 0;
+        font-weight: 600;
+        box-shadow: 0 12px 20px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+        border-left: 8px solid #FF9F4A;
+        color: #FFE8D6;
+        letter-spacing: -0.2px;
+    }
+    .board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+    .answer {
+        background: linear-gradient(145deg, #232E4A, #141E36);
+        padding: 1.2rem 0.8rem;
+        border-radius: 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 10px 0 #0A0F1F;
+        border: 1px solid rgba(255, 159, 74, 0.4);
+        letter-spacing: 0.3px;
+        color: #D9E2F5;
+    }
+    .answer.revealed {
+        background: linear-gradient(145deg, #2D6A4F, #1E4A38);
+        box-shadow: 0 4px 0 #0F2C1F;
+        transform: translateY(4px);
+        color: #FEF9C3;
+        border-color: #FFB347;
+        font-weight: 700;
+    }
+    .scorebox {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        background: rgba(0, 0, 0, 0.45);
+        padding: 0.6rem 2rem;
+        border-radius: 100px;
+        margin: 1.5rem auto;
+        width: fit-content;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 180, 100, 0.5);
+    }
+    .score {
+        font-size: 3rem;
+        font-weight: 800;
+        background: #00000055;
+        padding: 0 18px;
+        border-radius: 60px;
+        margin-left: 10px;
+        display: inline-block;
+        min-width: 85px;
+        color: #FFB347;
+        text-shadow: 0 0 5px #FF8C42;
+        letter-spacing: 2px;
+    }
+    .team-label {
+        font-size: 1.6rem;
+        background: #1A1F33;
+        padding: 6px 28px;
+        border-radius: 60px;
+        font-weight: 700;
+        backdrop-filter: blur(2px);
+        color: #FFE5B4;
+    }
+    button {
+        background: #FF8C42;
+        border: none;
+        padding: 10px 26px;
+        margin: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 60px;
+        cursor: pointer;
+        transition: 0.1s linear;
+        color: #0F1722;
+        box-shadow: 0 5px 0 #B45116;
+        font-family: inherit;
+    }
+    button:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 #B45116;
+    }
+    .guess-area {
+        background: #121a2cbb;
+        border-radius: 70px;
+        padding: 1rem 1.8rem;
+        margin: 20px 0 20px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        backdrop-filter: blur(8px);
+        border: 1px solid #FFB85E;
+    }
+    #guessInput {
+        padding: 12px 24px;
+        font-size: 1.1rem;
+        border-radius: 60px;
+        border: none;
+        width: 280px;
+        text-align: center;
+        background: #FFF7EC;
+        font-weight: 600;
+        color: #1E293B;
+        outline: none;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+    #guessInput:focus {
+        box-shadow: 0 0 0 3px #FF9F4A;
+        background: #FFFFFF;
+        transform: scale(1.01);
+    }
+    .active-team-badge {
+        font-size: 1.6rem;
+        background: #0c1122dd;
+        display: inline-block;
+        padding: 0.5rem 2rem;
+        border-radius: 80px;
+        margin: 0 auto 8px;
+        font-weight: bold;
+        backdrop-filter: blur(12px);
+        letter-spacing: 1px;
+    }
+    #strikes {
+        font-size: 2.6rem;
+        letter-spacing: 12px;
+        font-weight: 800;
+        background: #00000066;
+        border-radius: 80px;
+        display: inline-block;
+        padding: 0.3rem 1.8rem;
+        margin: 10px;
+        color: #FFA559;
+        font-family: monospace;
+        text-shadow: 0 0 6px #FF6B35;
+    }
+    .control-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 14px;
+        margin-top: 28px;
+    }
+    .btn-danger {
+        background: #E43F2F;
+        box-shadow: 0 5px 0 #8C2A1F;
+        color: white;
+    }
+    .btn-team {
+        background: #3A6EA5;
+        box-shadow: 0 5px 0 #21466C;
+        color: white;
+    }
+    .btn-next {
+        background: #3B9E7C;
+        box-shadow: 0 5px 0 #246B53;
+        color: white;
+    }
+    footer {
+        font-size: 0.8rem;
+        margin-top: 2rem;
+        opacity: 0.7;
+        background: #00000055;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 6px 20px;
+        border-radius: 50px;
+        backdrop-filter: blur(2px);
+    }
+    @media (max-width: 700px) {
+        .answer { font-size: 0.9rem; padding: 1rem; }
+        .question { font-size: 1.3rem; }
+        .scorebox { gap: 1rem; padding: 0.3rem 1rem; }
+        .score { font-size: 2rem; min-width: 60px; }
+        .team-label { font-size: 1.2rem; padding: 4px 18px; }
+        h1 { font-size: 2.3rem; }
+        .active-team-badge { font-size: 1.2rem; }
+    }
+    button:hover {
+        filter: brightness(1.02);
+        transform: translateY(-1px);
+        transition: 0.05s;
+    }
+    .answer:not(.revealed):hover {
+        background: linear-gradient(145deg, #2F3C62, #1A2444);
+        transform: translateY(-2px);
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>5 PROTI 5</h1>
+    <div class="active-team-badge" id="activeTeamDisplay">Aktívny tím: A</div>
+
+    <div class="question" id="question"></div>
+
+    <div class="board" id="board"></div>
+
+    <div class="guess-area">
+        <input type="text" id="guessInput" placeholder="Zadaj odpoveď tímu..." autocomplete="off">
+        <button id="guessBtn">TIPOVAT</button>
+        <button id="strikeBtn" class="btn-danger">CHYBA</button>
+    </div>
+
+    <div class="scorebox">
+        <div class="team-label">TIM A <span class="score" id="a">0</span></div>
+        <div class="team-label">TIM B <span class="score" id="b">0</span></div>
+    </div>
+
+    <div id="strikes"></div>
+
+    <div class="control-group">
+        <button id="teamABtn" class="btn-team">AKTIVNY TIM A</button>
+        <button id="teamBBtn" class="btn-team">AKTIVNY TIM B</button>
+        <button id="nextBtn" class="btn-next">DALSIA OTÁZKA</button>
+    </div>
+    <footer>Spravny tip = body + reset chyb | 3 chyby = vymena timu</footer>
+</div>
+
+<script>
+    const questions = [
+        {q:"Čo si ľudia berú na dovolenku?", a:[["Oblečenie",35],["Peniaze",28],["Mobil",20],["Doklady",12],["Kozmetika",8],["Lieky",5]]},
+        {q:"Čo je v školskej taške?", a:[["Zošit",30],["Pero",25],["Učebnica",20],["Mobil",10],["Desiata",8],["Fľaša",7]]},
+        {q:"Čo nájdeš v kuchyni?", a:[["Chladnička",30],["Sporák",25],["Hrniec",15],["Tanier",12],["Príbor",10],["Mikrovlnka",8]]},
+        {q:"Obľúbené domáce zviera?", a:[["Pes",40],["Mačka",30],["Rybička",10],["Škrečok",8],["Papagáj",7],["Králik",5]]},
+        {q:"Čo robíš ráno?", a:[["Raňajky",30],["Umývanie",25],["Obliekanie",20],["Mobil",10],["Škola",8],["Káva",7]]},
+        {q:"Čo býva v aute?", a:[["Volant",30],["Sedadlo",25],["Motor",20],["Rádio",10],["Pás",8],["Koleso",7]]},
+        {q:"Čo si berieš do školy?", a:[["Zošit",30],["Pero",25],["Učebnica",20],["Mobil",10],["Desiata",8],["Taška",7]]},
+        {q:"Čo sa nachádza v parku?", a:[["Stromy",30],["Lavička",25],["Deti",15],["Pes",12],["Kvetiny",10],["Cesta",8]]},
+        {q:"Čo robia ľudia na internete?", a:[["Sociálne siete",30],["Videá",25],["Hry",15],["Učenie",12],["Nakupovanie",10],["Chat",8]]},
+        {q:"Čo je na pizze?", a:[["Syr",30],["Šunka",25],["Paradajka",15],["Saláma",12],["Huby",10],["Kukurica",8]]},
+        {q:"Šport s loptou?", a:[["Futbal",35],["Basketbal",25],["Volejbal",15],["Tenis",10],["Hádzaná",8],["Golf",7]]},
+        {q:"Čo býva v obývačke?", a:[["Televízor",30],["Sedačka",25],["Stôl",15],["Koberec",12],["Polica",10],["Lampa",8]]},
+        {q:"Čo nájdeš v kúpeľni?", a:[["Sprcha",30],["Zubná kefka",25],["Uterák",15],["Mydlo",12],["Zrkadlo",10],["Práčka",8]]},
+        {q:"Čo si ľudia kupujú v pekárni?", a:[["Chlieb",35],["Rožok",25],["Koláč",15],["Bageta",10],["Šiška",8],["Buchta",7]]},
+        {q:"Čo sa používa na písanie?", a:[["Pero",35],["Ceruzka",25],["Fixka",15],["Počítač",10],["Tablet",8],["Krieda",7]]},
+        {q:"Čo nájdeš v lese?", a:[["Stromy",35],["Huby",25],["Zvieratá",15],["Kríky",10],["Potok",8],["Turisti",7]]},
+        {q:"Čo býva v chladničke?", a:[["Mlieko",30],["Syr",25],["Maslo",15],["Jogurt",12],["Mäso",10],["Vajcia",8]]},
+        {q:"Čo si ľudia dávajú na narodeniny?", a:[["Darček",35],["Torta",25],["Kvety",15],["Čokoláda",10],["Peniaze",8],["Prianie",7]]},
+        {q:"Čo robíš cez víkend?", a:[["Oddych",30],["Výlety",25],["Šport",15],["Hry",12],["Rodina",10],["Film",8]]},
+        {q:"Čo sa nachádza v škole?", a:[["Trieda",30],["Učiteľ",25],["Lavica",15],["Tabuľa",12],["Telocvičňa",10],["Žiaci",8]]},
+        {q:"Aké je obľúbené ovocie?", a:[["Jablko",30],["Banán",25],["Jahoda",15],["Pomaranč",12],["Hrozno",10],["Melón",8]]},
+        {q:"Čo býva na pláži?", a:[["Piesok",30],["More",25],["Slnečník",15],["Ľudia",12],["Lopta",10],["Ležadlo",8]]},
+        {q:"Čo robí učiteľ?", a:[["Učí",40],["Skúša",20],["Vysvetľuje",15],["Známkuje",10],["Píše",8],["Pomáha",7]]},
+        {q:"Čo je v počítači?", a:[["Procesor",30],["RAM",25],["Disk",15],["Grafika",12],["Ventilátor",10],["Zdroj",8]]},
+        {q:"Čo si ľudia obliekajú v zime?", a:[["Bunda",35],["Čiapka",20],["Šál",15],["Rukavice",12],["Topánky",10],["Sveter",8]]},
+        {q:"Čo si dáš na raňajky?", a:[["Chlieb",30],["Cereálie",25],["Jogurt",15],["Vajcia",12],["Ovocie",10],["Čaj",8]]},
+        {q:"Čo nájdeš v nemocnici?", a:[["Lekár",30],["Sestra",25],["Pacient",15],["Liek",12],["Posteľ",10],["Prístroj",8]]},
+        {q:"Čo býva v zoo?", a:[["Lev",30],["Slon",25],["Opica",15],["Žirafa",12],["Tiger",10],["Medveď",8]]},
+        {q:"Čo sa používa pri futbale?", a:[["Lopta",35],["Brána",20],["Kopačky",15],["Rozhodca",12],["Dres",10],["Ihrisko",8]]},
+        {q:"Čo nájdeš v knižnici?", a:[["Kniha",40],["Polica",20],["Knihovník",15],["Stôl",10],["Čitateľ",8],["Časopis",7]]},
+        {q:"Čo robíš na mobile?", a:[["Chat",30],["Sociálne siete",25],["Volanie",15],["Hry",12],["Fotky",10],["Hudba",8]]},
+        {q:"Čo sa nachádza na ihrisku?", a:[["Šmykľavka",30],["Hojdačka",25],["Deti",15],["Pieskovisko",12],["Lopta",10],["Lavička",8]]},
+        {q:"Čo si kúpiš v supermarkete?", a:[["Chlieb",30],["Mlieko",25],["Mäso",15],["Ovocie",12],["Zelenina",10],["Sladkosti",8]]},
+        {q:"Čo robíš večer?", a:[["Spánok",30],["TV",25],["Mobil",15],["Sprcha",12],["Čítanie",10],["Hry",8]]},
+        {q:"Čo sa nachádza na stole?", a:[["Tanier",30],["Pohár",25],["Príbor",15],["Mobil",12],["Kniha",10],["Pero",8]]},
+        {q:"Čo si berieš na výlet?", a:[["Batoh",30],["Voda",25],["Jedlo",15],["Mobil",12],["Peniaze",10],["Mapa",8]]},
+        {q:"Čo býva v telocvični?", a:[["Lopta",30],["Bránka",25],["Žinenka",15],["Koš",12],["Žiaci",10],["Tréner",8]]},
+        {q:"Čo robíš počas dažďa?", a:[["Dáždnik",30],["Doma",25],["Film",15],["Spánok",12],["Kniha",10],["Hry",8]]},
+        {q:"Čo je v spálni?", a:[["Posteľ",40],["Skriňa",20],["Lampa",15],["Stôl",10],["Vankúš",8],["Dečka",7]]}
+    ];
+
+    let currentIndex = 0;
+    let currentQuestion = null;
+    let revealed = [];
+    let teamActive = "A";
+    let scoreA = 0, scoreB = 0;
+    let strikes = 0;
+
+    const questionDiv = document.getElementById("question");
+    const boardDiv = document.getElementById("board");
+    const scoreADiv = document.getElementById("a");
+    const scoreBDiv = document.getElementById("b");
+    const strikesDiv = document.getElementById("strikes");
+    const activeTeamSpan = document.getElementById("activeTeamDisplay");
+    const guessInput = document.getElementById("guessInput");
+
+    function updateScoresUI() {
+        scoreADiv.textContent = scoreA;
+        scoreBDiv.textContent = scoreB;
+    }
+
+    function updateStrikesUI() {
+        if (strikes === 0) {
+            strikesDiv.textContent = "ziadne chyby";
+        } else {
+            strikesDiv.textContent = "X".repeat(strikes);
+        }
+    }
+
+    function updateActiveTeamUI() {
+        activeTeamSpan.innerHTML = teamActive === "A" ? "AKTIVNY TIM A" : "AKTIVNY TIM B";
+    }
+
+    function setActiveTeam(team) {
+        if (team !== "A" && team !== "B") return;
+        teamActive = team;
+        strikes = 0;
+        updateStrikesUI();
+        updateActiveTeamUI();
+        guessInput.value = "";
+        guessInput.focus();
+    }
+
+    function addPointsToActiveTeam(points) {
+        if (teamActive === "A") {
+            scoreA += points;
+        } else {
+            scoreB += points;
+        }
+        updateScoresUI();
+    }
+
+    function isAllRevealed() {
+        return revealed.every(v => v === true);
+    }
+
+    function renderBoard() {
+        if (!currentQuestion) return;
+        boardDiv.innerHTML = "";
+        currentQuestion.a.forEach((item, idx) => {
+            const tile = document.createElement("div");
+            tile.className = "answer";
+            if (revealed[idx]) {
+                tile.classList.add("revealed");
+                tile.textContent = (idx+1) + ". " + item[0] + " — " + item[1] + " bodov";
+            } else {
+                tile.textContent = (idx+1) + ". ?????";
+            }
+            boardDiv.appendChild(tile);
+        });
+    }
+
+    function loadQuestion() {
+        currentQuestion = questions[currentIndex];
+        questionDiv.textContent = currentQuestion.q;
+        revealed = new Array(currentQuestion.a.length).fill(false);
+        strikes = 0;
+        updateStrikesUI();
+        renderBoard();
+        guessInput.value = "";
+        guessInput.focus();
+    }
+
+    function nextQuestion() {
+        currentIndex = (currentIndex + 1) % questions.length;
+        loadQuestion();
+    }
+
+    function normalizeText(str) {
+        return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function makeGuess() {
+        if (!currentQuestion) return;
+        if (isAllRevealed()) {
+            alert("Všetky odpovede už boli odhalene! Klikni na 'DALSIA OTÁZKA'.");
+            return;
+        }
+
+        const rawGuess = guessInput.value.trim();
+        if (rawGuess === "") {
+            alert("Zadaj odpoved, ktoru tim povedal!");
+            return;
+        }
+
+        const normalizedGuess = normalizeText(rawGuess);
+        let foundIndex = -1;
+        for (let i = 0; i < currentQuestion.a.length; i++) {
+            if (revealed[i]) continue;
+            const answerText = currentQuestion.a[i][0];
+            const normalizedAnswer = normalizeText(answerText);
+            if (normalizedAnswer === normalizedGuess) {
+                foundIndex = i;
+                break;
+            }
+        }
+
+        if (foundIndex !== -1) {
+            const points = currentQuestion.a[foundIndex][1];
+            addPointsToActiveTeam(points);
+            revealed[foundIndex] = true;
+            renderBoard();
+            strikes = 0;
+            updateStrikesUI();
+            guessInput.value = "";
+            if (isAllRevealed()) {
+                setTimeout(() => {
+                    alert("Super! Tim " + teamActive + " odhalil vsetky odpovede! Pokracujte dalsou otazkou.");
+                }, 40);
+            }
+            guessInput.focus();
+        } else {
+            strikes++;
+            updateStrikesUI();
+            guessInput.value = "";
+            guessInput.focus();
+            if (strikes >= 3) {
+                const nextTeam = teamActive === "A" ? "B" : "A";
+                alert("X X X TIM " + teamActive + " ma 3 chyby! Prebera TIM " + nextTeam + ".");
+                setActiveTeam(nextTeam);
+                updateStrikesUI();
+            } else {
+                const oldPlaceholder = guessInput.placeholder;
+                guessInput.placeholder = "X ZLA ODPOVED! skuste inu...";
+                setTimeout(() => { guessInput.placeholder = oldPlaceholder; }, 1200);
+            }
+        }
+    }
+
+    function manualStrike() {
+        if (!currentQuestion) return;
+        strikes++;
+        updateStrikesUI();
+        if (strikes >= 3) {
+            const nextTeam = teamActive === "A" ? "B" : "A";
+            alert("CHYBA c.3! Tim " + teamActive + " straca kolo, prebera TIM " + nextTeam + ".");
+            setActiveTeam(nextTeam);
+        }
+        guessInput.value = "";
+        guessInput.focus();
+        const strikeBtn = document.getElementById("strikeBtn");
+        const originalBg = strikeBtn.style.backgroundColor;
+        strikeBtn.style.backgroundColor = "#B32D1E";
+        setTimeout(() => { strikeBtn.style.backgroundColor = ""; }, 150);
+    }
+
+    function initGame() {
+        currentIndex = Math.floor(Math.random() * questions.length);
+        teamActive = "A";
+        scoreA = 0;
+        scoreB = 0;
+        strikes = 0;
+        updateScoresUI();
+        updateActiveTeamUI();
+        loadQuestion();
+        document.getElementById("teamABtn").onclick = () => setActiveTeam("A");
+        document.getElementById("teamBBtn").onclick = () => setActiveTeam("B");
+        document.getElementById("nextBtn").onclick = () => nextQuestion();
+        document.getElementById("guessBtn").onclick = () => makeGuess();
+        document.getElementById("strikeBtn").onclick = () => manualStrike();
+        guessInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                makeGuess();
+            }
+        });
+    }
+    initGame();
+</script>
+</body>
+</html>
